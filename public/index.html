@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Downloader - Download from YouTube, TikTok, Instagram & More</title>
+    <link rel="stylesheet" href="style.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxxxxxxxxxx"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">🎬 Video Downloader</h1>
+            <p class="tagline">Download videos from any platform</p>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Top Ad Space -->
+        <div class="ad-space top-ad">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+                 data-ad-slot="xxxxxxxx"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+
+        <!-- Main Section -->
+        <section class="main-section">
+            <div class="input-section">
+                <h2>Paste Video URL</h2>
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="videoUrl" 
+                        placeholder="Paste YouTube, TikTok, Instagram, Twitter, Vimeo link..."
+                        class="input-field"
+                    >
+                    <button class="btn btn-primary" onclick="fetchVideoInfo()">
+                        <span id="fetchBtn">Get Info</span>
+                        <span id="fetchLoader" class="hidden">Loading...</span>
+                    </button>
+                </div>
+                <p class="supported-platforms">
+                    ✅ Supports: YouTube • TikTok • Instagram • Twitter/X • Vimeo • Facebook • Twitch • Reddit
+                </p>
+            </div>
+
+            <!-- Video Info Section -->
+            <div id="videoInfo" class="video-info hidden">
+                <div class="video-preview">
+                    <img id="videoThumbnail" src="" alt="Video thumbnail" class="thumbnail">
+                    <div class="video-details">
+                        <h3 id="videoTitle">Video Title</h3>
+                        <p id="videoPlatform" class="platform-badge">Platform</p>
+                        <p id="videoUploader">By: Unknown</p>
+                        <p id="videoDuration" class="duration">Duration: 0:00</p>
+                    </div>
+                </div>
+
+                <!-- Options Section -->
+                <div class="options-section">
+                    <div class="option-group">
+                        <label>Format:</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="format" value="mp4" checked>
+                                <span>MP4 (Video)</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="format" value="mp3">
+                                <span>MP3 (Audio Only)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="option-group" id="qualityGroup">
+                        <label>Video Quality:</label>
+                        <select id="qualitySelect" class="select-field">
+                            <option value="">Select Quality</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-success" onclick="downloadVideo()">
+                        <span id="downloadBtn">⬇️ Download Now</span>
+                        <span id="downloadLoader" class="hidden">Processing...</span>
+                    </button>
+                </div>
+
+                <!-- Download Tips -->
+                <div class="tips-box">
+                    <h4>💡 Tips:</h4>
+                    <ul>
+                        <li>For MP3: Audio will be extracted at 192kbps quality</li>
+                        <li>For MP4: Select your preferred video quality</li>
+                        <li>File will download directly to your device</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-message hidden"></div>
+            <div id="successMessage" class="success-message hidden"></div>
+        </section>
+
+        <!-- Side Ad Space -->
+        <aside class="ad-sidebar">
+            <div class="ad-space side-ad">
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+                     data-ad-slot="xxxxxxxx"
+                     data-ad-format="vertical"
+                     data-full-width-responsive="false"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Footer Ad -->
+    <footer class="footer">
+        <div class="ad-space footer-ad">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-xxxxxxxxxxxxxxxx"
+                 data-ad-slot="xxxxxxxx"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        <p>&copy; 2026 Video Downloader. Made with ❤️</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
