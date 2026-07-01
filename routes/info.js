@@ -18,8 +18,25 @@ router.post('/info', async (req, res) => {
 
     // Use yt-dlp to get video info
     try {
-      const command = `yt-dlp -j --no-warnings "${url}"`;
-      const output = execSync(command, { encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 });
+      // Build command with platform-specific options
+      let command = `yt-dlp -j --no-warnings`;
+      
+      // Add headers for Facebook
+      if (url.includes('facebook.com')) {
+        command += ` --add-header "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"`;
+      }
+      
+      // Add URL
+      command += ` "${url}"`;
+      
+      console.log(`Executing: ${command.substring(0, 100)}...`);
+      
+      const output = execSync(command, { 
+        encoding: 'utf-8', 
+        maxBuffer: 10 * 1024 * 1024,
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+      
       const videoInfo = JSON.parse(output);
 
       // Extract relevant information
@@ -29,15 +46,30 @@ router.post('/info', async (req, res) => {
         thumbnail: videoInfo.thumbnail || '',
         uploader: videoInfo.uploader || 'Unknown',
         platforms: detectPlatform(url),
-        formats: extractFormats(videoInfo.formats || [])
+        formats: extractFormats(videoInfo.formats || []),
+        available: true
       };
 
       res.json(info);
     } catch (error) {
       console.error('yt-dlp error:', error.message);
+      
+      // More detailed error messages
+      let errorMsg = 'Could not retrieve video info';
+      
+      if (error.message.includes('403') || error.message.includes('Forbidden')) {
+        errorMsg = 'Video is private or restricted. Try making it public.';
+      } else if (error.message.includes('404') || error.message.includes('Not Found')) {
+        errorMsg = 'Video not found. Check the URL and try again.';
+      } else if (error.message.includes('Sign in')) {
+        errorMsg = 'Video requires sign in. Try a public video.';
+      } else if (error.message.includes('Unsupported')) {
+        errorMsg = 'This platform is not supported. Try YouTube, TikTok, or Instagram.';
+      }
+      
       res.status(400).json({ 
-        error: 'Could not retrieve video info',
-        details: error.message 
+        error: errorMsg,
+        details: process.env.NODE_ENV === 'development' ? error.message : null
       });
     }
   } catch (error) {
@@ -64,7 +96,7 @@ function detectPlatform(url) {
   if (urlLower.includes('instagram.com')) return 'Instagram';
   if (urlLower.includes('twitter.com') || urlLower.includes('x.com')) return 'Twitter/X';
   if (urlLower.includes('vimeo.com')) return 'Vimeo';
-  if (urlLower.includes('facebook.com')) return 'Facebook';
+  if (urlLower.includes('facebook.com') || urlLower.includes('fb.watch')) return 'Facebook';
   if (urlLower.includes('twitch.tv')) return 'Twitch';
   if (urlLower.includes('reddit.com')) return 'Reddit';
   return 'Unknown Platform';
@@ -82,7 +114,7 @@ function extractFormats(formats) {
           quality,
           format_id: format.format_id,
           ext: format.ext,
-          filesize: format.filesize
+          filesize: format.filesize || 0
         };
       }
     }
