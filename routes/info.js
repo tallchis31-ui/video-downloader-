@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { execSync } = require('child_process');
+const https = require('https');
 
 // Get video info (title, duration, available formats/qualities)
 router.post('/info', async (req, res) => {
   try {
-    const { url } = req.body;
+    let { url } = req.body;
 
     if (!url) {
       return res.status(400).json({ error: 'URL is required' });
@@ -14,6 +15,20 @@ router.post('/info', async (req, res) => {
     // Validate URL
     if (!isValidUrl(url)) {
       return res.status(400).json({ error: 'Invalid URL format' });
+    }
+
+    console.log(`[INFO] Original URL: ${url}`);
+
+    // Expand Facebook share links
+    if (url.includes('facebook.com/share/')) {
+      console.log('[INFO] Detected Facebook share link, attempting to expand...');
+      try {
+        url = await expandFacebookShareLink(url);
+        console.log(`[INFO] Expanded to: ${url}`);
+      } catch (expandError) {
+        console.warn('[WARN] Could not expand Facebook link, trying original:', expandError.message);
+        // Continue with original URL
+      }
     }
 
     // Use yt-dlp to get video info
@@ -41,10 +56,9 @@ router.post('/info', async (req, res) => {
         headers += ' --add-header "Referer:https://www.reddit.com/"';
       }
       
-      const command = `yt-dlp -j ${headers} --no-warnings "${url}"`;
+      const command = `yt-dlp -j ${headers} --no-warnings --socket-timeout 30 "${url}"`;
       
       console.log(`[INFO] Processing URL: ${url.substring(0, 60)}...`);
-      console.log(`[INFO] Using headers for platform detection`);
       
       const output = execSync(command, { 
         encoding: 'utf-8', 
@@ -80,17 +94,19 @@ router.post('/info', async (req, res) => {
       if (errorStr.includes('403') || errorStr.includes('forbidden')) {
         errorMsg = '🔒 Video is private or restricted. Make sure it\'s public.';
       } else if (errorStr.includes('404') || errorStr.includes('not found')) {
-        errorMsg = '❌ Video not found. Check the URL.';
+        errorMsg = '❌ Video not found. Check the URL is correct and video is public.';
       } else if (errorStr.includes('sign in') || errorStr.includes('authentication')) {
-        errorMsg = '🔐 Video requires sign-in. Try a public video.';
+        errorMsg = '🔐 Video requires sign-in. Try sharing with someone else to get a public link.';
       } else if (errorStr.includes('unsupported') || errorStr.includes('extractor')) {
         errorMsg = '⚠️ Platform not supported or video unavailable.';
       } else if (errorStr.includes('timeout')) {
-        errorMsg = '⏱️ Request timeout. Server may be slow. Try again.';
+        errorMsg = '⏱️ Request timeout. Server slow or video too large. Try again.';
       } else if (errorStr.includes('no such file')) {
         errorMsg = '⚙️ yt-dlp not installed on server. Contact admin.';
       } else if (errorStr.includes('georestricted')) {
         errorMsg = '🌍 Video is geo-restricted to your region.';
+      } else if (errorStr.includes('private')) {
+        errorMsg = '🔐 Video is private. Make it public first.';
       }
       
       res.status(statusCode).json({ 
@@ -103,6 +119,37 @@ router.post('/info', async (req, res) => {
     res.status(500).json({ error: 'Server error', details: error.message });
   }
 });
+
+// Helper: Expand Facebook share links
+function expandFacebookShareLink(shareUrl) {
+  return new Promise((resolve, reject) => {
+    try {
+      const urlObj = new URL(shareUrl);
+      
+      // Try using curl/wget to follow redirects
+      try {
+        const expandedUrl = execSync(`curl -s -I -L "${shareUrl}" | grep -i "^location" | tail -1 | cut -d' ' -f2`, {
+          encoding: 'utf-8',
+          timeout: 10000,
+          stdio: ['pipe', 'pipe', 'pipe']
+        }).trim();
+        
+        if (expandedUrl && expandedUrl.startsWith('http')) {
+          console.log('[INFO] Expanded via curl');
+          resolve(expandedUrl);
+        } else {
+          reject(new Error('Could not expand URL'));
+        }
+      } catch (curlError) {
+        // Fallback: try alternative methods
+        console.warn('[WARN] curl failed, trying alternative...');
+        reject(curlError);
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
 
 // Helper: Validate URL
 function isValidUrl(url) {
