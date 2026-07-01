@@ -12,7 +12,7 @@
     <nav class="navbar">
         <div class="container">
             <h1 class="logo">🎬 Video Downloader</h1>
-            <p class="tagline">Download videos from any platform</p>
+            <p class="tagline">Download videos from any platform instantly</p>
         </div>
     </nav>
 
@@ -34,7 +34,8 @@
         <!-- Main Section -->
         <section class="main-section">
             <div class="input-section">
-                <h2>Paste Video URL</h2>
+                <h2>Download Videos Instantly</h2>
+                <p class="section-description">Paste any video URL below and download in MP4 or MP3 format. Works with YouTube, TikTok, Instagram, Twitter, Vimeo, and more!</p>
                 <div class="input-group">
                     <input 
                         type="text" 
@@ -43,7 +44,7 @@
                         class="input-field"
                     >
                     <button class="btn btn-primary" onclick="fetchVideoInfo()">
-                        <span id="fetchBtn">Get Info</span>
+                        <span id="fetchBtn">⬇️ Download</span>
                         <span id="fetchLoader" class="hidden">Loading...</span>
                     </button>
                 </div>
@@ -88,18 +89,19 @@
                     </div>
 
                     <button class="btn btn-success" onclick="downloadVideo()">
-                        <span id="downloadBtn">⬇️ Download Now</span>
+                        <span id="downloadBtn">⬇️ Start Download</span>
                         <span id="downloadLoader" class="hidden">Processing...</span>
                     </button>
                 </div>
 
                 <!-- Download Tips -->
                 <div class="tips-box">
-                    <h4>💡 Tips:</h4>
+                    <h4>💡 Download Tips:</h4>
                     <ul>
-                        <li>For MP3: Audio will be extracted at 192kbps quality</li>
-                        <li>For MP4: Select your preferred video quality</li>
-                        <li>File will download directly to your device</li>
+                        <li><strong>MP3 Format:</strong> Audio will be extracted at 192kbps quality, perfect for music and podcasts</li>
+                        <li><strong>MP4 Format:</strong> Select your preferred video quality from 1080p down to 360p</li>
+                        <li><strong>File Size:</strong> Check the file size before downloading to ensure you have enough storage</li>
+                        <li><strong>Direct Download:</strong> Files download directly to your device without compression</li>
                     </ul>
                 </div>
             </div>
@@ -107,6 +109,54 @@
             <!-- Error Message -->
             <div id="errorMessage" class="error-message hidden"></div>
             <div id="successMessage" class="success-message hidden"></div>
+
+            <!-- Features Section -->
+            <div class="features-section">
+                <h3>Why Choose Our Video Downloader?</h3>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h4>🚀 Fast & Easy</h4>
+                        <p>Paste a URL and download in seconds. No registration required.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📱 Multi-Platform</h4>
+                        <p>Download from YouTube, TikTok, Instagram, Twitter, Vimeo, Facebook, Twitch, and more.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🎥 Multiple Formats</h4>
+                        <p>Choose between MP4 video format or MP3 audio format with various quality options.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>💯 100% Free</h4>
+                        <p>Download unlimited videos completely free with no ads interrupting your downloads.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="faq-section">
+                <h3>Frequently Asked Questions</h3>
+                <div class="faq-item">
+                    <h4>How do I download a video?</h4>
+                    <p>Simply paste the video URL into the input field and click "Download". Select your preferred format (MP4 or MP3) and quality, then click "Start Download".</p>
+                </div>
+                <div class="faq-item">
+                    <h4>What platforms are supported?</h4>
+                    <p>We support YouTube, TikTok, Instagram, Twitter/X, Vimeo, Facebook, Twitch, Reddit, and many other video platforms.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Is this service free?</h4>
+                    <p>Yes! Our service is completely free. You can download unlimited videos without paying anything.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>What is the maximum file size?</h4>
+                    <p>There is no file size limit. You can download videos of any length and quality available on the platform.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Do I need to register an account?</h4>
+                    <p>No registration or account is required. Simply paste the URL and download your video.</p>
+                </div>
+            </div>
         </section>
 
         <!-- Side Ad Space -->
@@ -138,7 +188,14 @@
                  (adsbygoogle = window.adsbygoogle || []).push({});
             </script>
         </div>
-        <p>&copy; 2026 Video Downloader. Made with ❤️</p>
+        <div class="footer-content">
+            <p>&copy; 2026 Video Downloader. All rights reserved. Made with ❤️</p>
+            <div class="footer-links">
+                <a href="privacy.html">Privacy Policy</a> • 
+                <a href="terms.html">Terms of Service</a> • 
+                <a href="about.html">About Us</a>
+            </div>
+        </div>
     </footer>
 
     <script src="script.js"></script>
