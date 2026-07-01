@@ -25,18 +25,21 @@ router.post('/download', async (req, res) => {
 
     console.log(`📥 Downloading: ${url} | Format: ${format} | Quality: ${quality}`);
 
-    // Build yt-dlp command
-    let command = `yt-dlp -f "best" --no-warnings -o "${tempDir}/%(title)s.%(ext)s"`;
+    // Get platform-specific headers
+    const headers = getPlatformHeaders(url);
+    
+    // Build yt-dlp command with platform-specific options
+    let command = `yt-dlp ${headers} --no-warnings -o "${tempDir}/%(title)s.%(ext)s"`;
 
     if (format === 'mp3') {
       // Audio only
-      command = `yt-dlp -x --audio-format mp3 --audio-quality 192K --no-warnings -o "${tempDir}/%(title)s.%(ext)s" "${url}"`;
+      command = `yt-dlp ${headers} -x --audio-format mp3 --audio-quality 192K --no-warnings -o "${tempDir}/%(title)s.%(ext)s" "${url}"`;
     } else if (format === 'mp4' && quality) {
       // Video with specific quality
-      command = `yt-dlp -f "best[height<=${quality}]/best" --merge-output-format mp4 --no-warnings -o "${tempDir}/%(title)s.%(ext)s" "${url}"`;
+      command = `yt-dlp ${headers} -f "best[height<=${quality}]/best" --merge-output-format mp4 --no-warnings -o "${tempDir}/%(title)s.%(ext)s" "${url}"`;
     } else {
       // Default best quality
-      command = `yt-dlp -f "best" --merge-output-format mp4 --no-warnings -o "${tempDir}/%(title)s.%(ext)s" "${url}"`;
+      command = `yt-dlp ${headers} -f "best" --merge-output-format mp4 --no-warnings -o "${tempDir}/%(title)s.%(ext)s" "${url}"`;
     }
 
     // Execute download
@@ -44,7 +47,8 @@ router.post('/download', async (req, res) => {
       const output = execSync(command, { 
         encoding: 'utf-8', 
         maxBuffer: 10 * 1024 * 1024,
-        timeout: 300000 // 5 minute timeout
+        timeout: 300000, // 5 minute timeout
+        stdio: ['pipe', 'pipe', 'pipe']
       });
 
       console.log('Download output:', output);
@@ -88,11 +92,21 @@ router.post('/download', async (req, res) => {
 
     } catch (error) {
       console.error('yt-dlp execution error:', error.message);
+      
+      let errorMsg = 'Download failed';
+      if (error.message.includes('Video unavailable')) {
+        errorMsg = 'Video is unavailable or restricted';
+      } else if (error.message.includes('403') || error.message.includes('Forbidden')) {
+        errorMsg = 'Access denied. Video may be private.';
+      } else if (error.message.includes('404')) {
+        errorMsg = 'Video not found';
+      } else if (error.message.includes('Sign in')) {
+        errorMsg = 'Video requires authentication';
+      }
+      
       res.status(400).json({ 
-        error: 'Download failed',
-        details: error.message.includes('Video unavailable') 
-          ? 'Video is unavailable or restricted' 
-          : 'Could not download this video'
+        error: errorMsg,
+        details: process.env.NODE_ENV === 'development' ? error.message : null
       });
     }
 
@@ -101,5 +115,44 @@ router.post('/download', async (req, res) => {
     res.status(500).json({ error: 'Server error during download' });
   }
 });
+
+// Helper: Get platform-specific headers and options
+function getPlatformHeaders(url) {
+  const urlLower = url.toLowerCase();
+  
+  // User-Agent header for all requests
+  const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+  const baseHeaders = `--add-header "User-Agent:${userAgent}"`;
+  
+  // Platform-specific options
+  if (urlLower.includes('facebook.com') || urlLower.includes('fb.watch')) {
+    // Facebook needs extra headers
+    return `${baseHeaders} --add-header "Referer:https://www.facebook.com/" --add-header "Cookie:datr=test" --add-header "Accept-Language:en-US,en;q=0.9"`;
+  } else if (urlLower.includes('instagram.com')) {
+    // Instagram
+    return `${baseHeaders} --add-header "Referer:https://www.instagram.com/"`;
+  } else if (urlLower.includes('tiktok.com')) {
+    // TikTok
+    return `${baseHeaders} --add-header "Referer:https://www.tiktok.com/" --add-header "Accept-Language:en-US,en;q=0.9"`;
+  } else if (urlLower.includes('twitter.com') || urlLower.includes('x.com')) {
+    // Twitter/X
+    return `${baseHeaders} --add-header "Referer:https://twitter.com/"`;
+  } else if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
+    // YouTube
+    return `${baseHeaders}`;
+  } else if (urlLower.includes('vimeo.com')) {
+    // Vimeo
+    return `${baseHeaders} --add-header "Referer:https://www.vimeo.com/"`;
+  } else if (urlLower.includes('twitch.tv')) {
+    // Twitch
+    return `${baseHeaders} --add-header "Referer:https://www.twitch.tv/"`;
+  } else if (urlLower.includes('reddit.com')) {
+    // Reddit
+    return `${baseHeaders} --add-header "Referer:https://www.reddit.com/"`;
+  }
+  
+  // Default headers for unknown platforms
+  return baseHeaders;
+}
 
 module.exports = router;
